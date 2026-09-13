@@ -7,7 +7,7 @@ import { BookingModal } from './components/BookingModal';
 import { PatientBookings } from './components/PatientBookings';
 import { DoctorPortal } from './components/DoctorPortal';
 import { AdminDashboard } from './components/AdminDashboard';
-import { api } from './api';
+import { AuthService } from './services/auth.service';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('explore');
@@ -19,8 +19,8 @@ export const App: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('amrutam_token');
     if (token) {
-      api.get('/auth/me')
-        .then((res) => setCurrentUser(res.data.data))
+      AuthService.getProfile()
+        .then((userData) => setCurrentUser(userData))
         .catch(() => {
           localStorage.removeItem('amrutam_token');
           setCurrentUser(null);

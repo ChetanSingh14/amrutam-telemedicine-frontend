@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../api';
+import { BookingService } from '../services/booking.service';
+import { DoctorService } from '../services/doctor.service';
+import { PrescriptionService } from '../services/prescription.service';
 import { Consultation } from '../types';
 import { Plus, Calendar, Clock, FilePlus, CheckCircle, Video, X } from 'lucide-react';
 
@@ -22,8 +24,8 @@ export const DoctorPortal: React.FC = () => {
   const fetchConsultations = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/bookings/my-bookings');
-      setConsultations(res.data.data || []);
+      const data = await BookingService.getMyBookings();
+      setConsultations(data || []);
     } catch (err) {
       console.error('Failed to load doctor consultations', err);
     } finally {
@@ -39,10 +41,10 @@ export const DoctorPortal: React.FC = () => {
     e.preventDefault();
     setSlotMsg(null);
     try {
-      await api.post('/doctors/availability/me', {
-        startTime: new Date(startTime).toISOString(),
-        endTime: new Date(endTime).toISOString()
-      });
+      await DoctorService.addAvailabilitySlot(
+        new Date(startTime).toISOString(),
+        new Date(endTime).toISOString()
+      );
       setSlotMsg('✅ Availability slot published successfully!');
       setStartTime('');
       setEndTime('');
@@ -65,7 +67,7 @@ export const DoctorPortal: React.FC = () => {
     if (!selectedConsultation || medicines.length === 0) return;
 
     try {
-      await api.post('/prescriptions', {
+      await PrescriptionService.createPrescription({
         consultationId: selectedConsultation.id,
         diagnosis,
         medicines

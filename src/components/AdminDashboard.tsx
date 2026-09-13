@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../api';
+import { AdminService } from '../services/admin.service';
 import { SystemAnalytics } from '../types';
 import { ShieldCheck, Users, Stethoscope, Calendar, DollarSign, Activity, CheckCircle, XCircle } from 'lucide-react';
 
@@ -11,12 +11,12 @@ export const AdminDashboard: React.FC = () => {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [analyticsRes, logsRes] = await Promise.all([
-        api.get('/admin/analytics'),
-        api.get('/admin/audit-logs')
+      const [analyticsData, logsData] = await Promise.all([
+        AdminService.getAnalytics(),
+        AdminService.getAuditLogs()
       ]);
-      setAnalytics(analyticsRes.data.data);
-      setAuditLogs(logsRes.data.data || []);
+      setAnalytics(analyticsData);
+      setAuditLogs(logsData || []);
     } catch (err) {
       console.error('Failed to load admin dashboard data', err);
     } finally {

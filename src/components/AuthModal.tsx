@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { api } from '../api';
+import { AuthService } from '../services/auth.service';
 import { User, Role } from '../types';
 import { X, Lock, Mail, User as UserIcon, Phone, Stethoscope } from 'lucide-react';
 
@@ -28,18 +28,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
 
     try {
       if (isRegister) {
-        const res = await api.post('/auth/register', {
+        const { token, user } = await AuthService.register({
           email,
           password,
           fullName,
           phone,
           role
         });
-        const { token, user } = res.data.data;
         onSuccess(user, token);
       } else {
-        const res = await api.post('/auth/login', { email, password });
-        const { token, user } = res.data.data;
+        const { token, user } = await AuthService.login({ email, password });
         onSuccess(user, token);
       }
       onClose();

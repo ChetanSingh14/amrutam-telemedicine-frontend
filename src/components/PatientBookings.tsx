@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../api';
+import { BookingService } from '../services/booking.service';
 import { Consultation, Prescription } from '../types';
 import { Video, FileText, Calendar, Clock, CheckCircle2, AlertCircle, Download, X } from 'lucide-react';
 
@@ -11,8 +11,8 @@ export const PatientBookings: React.FC = () => {
   const fetchBookings = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/bookings/my-bookings');
-      setBookings(res.data.data || []);
+      const data = await BookingService.getMyBookings();
+      setBookings(data || []);
     } catch (err) {
       console.error('Failed to load patient bookings', err);
     } finally {
