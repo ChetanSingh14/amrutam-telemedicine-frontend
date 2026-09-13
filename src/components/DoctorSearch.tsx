@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../api';
+import { DoctorService } from '../services/doctor.service';
 import { Doctor } from '../types';
+import { useToast } from '../context/ToastContext';
 import { Search, Filter, Star, Clock, Award, CheckCircle, Calendar } from 'lucide-react';
 
 interface DoctorSearchProps {
@@ -12,19 +13,18 @@ export const DoctorSearch: React.FC<DoctorSearchProps> = ({ onSelectDoctor }) =>
   const [search, setSearch] = useState('');
   const [specialization, setSpecialization] = useState('');
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   const fetchDoctors = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/doctors', {
-        params: {
-          search: search || undefined,
-          specialization: specialization || undefined
-        }
+      const data = await DoctorService.searchDoctors({
+        search: search || undefined,
+        specialization: specialization || undefined
       });
-      setDoctors(res.data.data);
-    } catch (err) {
-      console.error('Failed to fetch doctors', err);
+      setDoctors(data || []);
+    } catch (err: any) {
+      showToast(err.response?.data?.message || 'Failed to fetch doctors list', 'error');
     } finally {
       setLoading(false);
     }

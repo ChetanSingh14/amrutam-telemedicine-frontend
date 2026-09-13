@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../api';
+import { DoctorService } from '../services/doctor.service';
+import { BookingService } from '../services/booking.service';
 import { Doctor, AvailabilitySlot } from '../types';
-import { X, Calendar, Clock, CheckCircle, AlertCircle, ShieldCheck } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
+import { X, Calendar, Clock, AlertCircle, ShieldCheck } from 'lucide-react';
 
 interface BookingModalProps {
   doctor: Doctor | null;
@@ -15,20 +17,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onS
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (doctor) {
       setFetching(true);
-      api.get(`/doctors/${doctor.id}`)
-        .then((res) => {
-          const fetchedSlots = res.data.data.availableSlots || [];
+      DoctorService.getDoctorById(doctor.id)
+        .then((data) => {
+          const fetchedSlots = data.availableSlots || [];
           setSlots(fetchedSlots);
           if (fetchedSlots.length > 0) {
             setSelectedSlotId(fetchedSlots[0].id);
           }
         })
-        .catch(() => setError('Failed to load doctor availability slots.'))
+        .catch((err) => showToast('Failed to load doctor availability slots.', 'error'))
         .finally(() => setFetching(false));
     }
   }, [doctor]);
@@ -38,24 +40,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onS
   const handleBookSlot = async () => {
     if (!selectedSlotId) return;
     setLoading(true);
-    setError(null);
 
     const idempotencyKey = `book-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
     try {
-      await api.post('/bookings', {
-        slotId: selectedSlotId,
-        notes
-      }, {
-        headers: {
-          'x-idempotency-key': idempotencyKey
-        }
-      });
-
+      await BookingService.bookConsultation(selectedSlotId, notes, idempotencyKey);
+      showToast('🎉 Consultation booked successfully!', 'success');
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to book slot. It might have been booked concurrently.');
+      showToast(err.response?.data?.message || 'Failed to book slot. It might have been booked concurrently.', 'error');
     } finally {
       setLoading(false);
     }
@@ -75,12 +69,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onS
         <p style={{ color: 'var(--primary-dark)', fontWeight: 600, fontSize: '0.95rem', marginBottom: '1.5rem' }}>
           with {doctor.name} ({doctor.specialization})
         </p>
-
-        {error && (
-          <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: '8px', marginBottom: '1.25rem', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AlertCircle size={18} /> {error}
-          </div>
-        )}
 
         <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
