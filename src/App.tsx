@@ -1,48 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { User, Doctor } from './types';
+import { Doctor } from './types';
 import { Navbar } from './components/Navbar';
 import { AuthModal } from './components/AuthModal';
-import { DoctorSearch } from './components/DoctorSearch';
 import { BookingModal } from './components/BookingModal';
-import { PatientBookings } from './components/PatientBookings';
-import { DoctorPortal } from './components/DoctorPortal';
-import { AdminDashboard } from './components/AdminDashboard';
-import { AuthService } from './services/auth.service';
+import { AppRoutes } from './routes/AppRoutes';
+import { useAuth } from './context/AuthContext';
 
 export const App: React.FC = () => {
+  const { currentUser, logout, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('explore');
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [bookingSuccessMsg, setBookingSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('amrutam_token');
-    if (token) {
-      AuthService.getProfile()
-        .then((userData) => setCurrentUser(userData))
-        .catch(() => {
-          localStorage.removeItem('amrutam_token');
-          setCurrentUser(null);
-        });
-    }
-  }, []);
-
-  const handleAuthSuccess = (user: User, token: string) => {
-    localStorage.setItem('amrutam_token', token);
-    setCurrentUser(user);
-    if (user.role === 'DOCTOR') {
-      setActiveTab('doctor-portal');
-    } else if (user.role === 'ADMIN') {
-      setActiveTab('admin');
+    if (currentUser) {
+      if (currentUser.role === 'DOCTOR' && activeTab === 'explore') {
+        setActiveTab('doctor-portal');
+      } else if (currentUser.role === 'ADMIN' && activeTab === 'explore') {
+        setActiveTab('admin');
+      }
     } else {
       setActiveTab('explore');
     }
-  };
+  }, [currentUser]);
 
   const handleLogout = () => {
-    localStorage.removeItem('amrutam_token');
-    setCurrentUser(null);
+    logout('Logged out successfully.');
     setActiveTab('explore');
   };
 
@@ -53,6 +37,15 @@ export const App: React.FC = () => {
     }
     setSelectedDoctor(doctor);
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '1rem', color: 'var(--primary-dark)' }}>
+        <div style={{ width: '40px', height: '40px', border: '4px solid #ccfbf1', borderTop: '4px solid var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ fontWeight: 600 }}>Securing session & validating credentials...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -71,27 +64,12 @@ export const App: React.FC = () => {
       )}
 
       <main style={{ paddingBottom: '4rem' }}>
-        {activeTab === 'explore' && (
-          <DoctorSearch onSelectDoctor={handleSelectDoctor} />
-        )}
-
-        {activeTab === 'my-bookings' && (
-          <PatientBookings />
-        )}
-
-        {activeTab === 'doctor-portal' && (
-          <DoctorPortal />
-        )}
-
-        {activeTab === 'admin' && (
-          <AdminDashboard />
-        )}
+        <AppRoutes activeTab={activeTab} onSelectDoctor={handleSelectDoctor} />
       </main>
 
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onSuccess={handleAuthSuccess}
       />
 
       <BookingModal

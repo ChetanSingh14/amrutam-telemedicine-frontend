@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AdminService } from '../services/admin.service';
 import { SystemAnalytics } from '../types';
-import { ShieldCheck, Users, Stethoscope, Calendar, DollarSign, Activity, CheckCircle, XCircle } from 'lucide-react';
+import { ShieldCheck, Users, Stethoscope, Calendar, DollarSign, Activity } from 'lucide-react';
 
-export const AdminDashboard: React.FC = () => {
+export const AdminDashboardPage: React.FC = () => {
   const [analytics, setAnalytics] = useState<SystemAnalytics | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

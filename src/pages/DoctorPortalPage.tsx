@@ -3,9 +3,10 @@ import { BookingService } from '../services/booking.service';
 import { DoctorService } from '../services/doctor.service';
 import { PrescriptionService } from '../services/prescription.service';
 import { Consultation } from '../types';
-import { Plus, Calendar, Clock, FilePlus, CheckCircle, Video, X } from 'lucide-react';
+import { Plus, Calendar, FilePlus, Video, X, CheckCircle } from 'lucide-react';
 
-export const DoctorPortal: React.FC = () => {
+
+export const DoctorPortalPage: React.FC = () => {
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [startTime, setStartTime] = useState('');

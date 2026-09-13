@@ -1,6 +1,7 @@
 import React from 'react';
 import { User } from '../types';
-import { Stethoscope, Calendar, UserCheck, Shield, LogIn, LogOut, HeartHandshake } from 'lucide-react';
+import { ROUTE_REGISTRY } from '../routes/navigation.config';
+import { LogIn, LogOut, HeartHandshake } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: string;
@@ -27,43 +28,27 @@ export const Navbar: React.FC<NavbarProps> = ({
       </a>
 
       <div className="nav-menu">
-        <button
-          className={`nav-link ${activeTab === 'explore' ? 'active' : ''}`}
-          onClick={() => setActiveTab('explore')}
-        >
-          <Stethoscope size={18} />
-          Find Doctors
-        </button>
+        {ROUTE_REGISTRY.filter((route) => route.showInNavbar).map((route) => {
+          // Check role visibility
+          if (route.allowedRoles) {
+            if (!currentUser) return null;
+            if (!route.allowedRoles.includes(currentUser.role)) return null;
+          }
 
-        {currentUser && (
-          <button
-            className={`nav-link ${activeTab === 'my-bookings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('my-bookings')}
-          >
-            <Calendar size={18} />
-            My Bookings
-          </button>
-        )}
+          const Icon = route.icon;
+          const isActive = activeTab === route.id;
 
-        {currentUser?.role === 'DOCTOR' && (
-          <button
-            className={`nav-link ${activeTab === 'doctor-portal' ? 'active' : ''}`}
-            onClick={() => setActiveTab('doctor-portal')}
-          >
-            <UserCheck size={18} />
-            Doctor Studio
-          </button>
-        )}
-
-        {currentUser?.role === 'ADMIN' && (
-          <button
-            className={`nav-link ${activeTab === 'admin' ? 'active' : ''}`}
-            onClick={() => setActiveTab('admin')}
-          >
-            <Shield size={18} />
-            Admin Panel
-          </button>
-        )}
+          return (
+            <button
+              key={route.id}
+              className={`nav-link ${isActive ? 'active' : ''}`}
+              onClick={() => setActiveTab(route.id)}
+            >
+              <Icon size={18} />
+              {route.label}
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { AuthService } from '../services/auth.service';
-import { User, Role } from '../types';
-import { X, Lock, Mail, User as UserIcon, Phone, Stethoscope } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Role } from '../types';
+import { X, Lock, Mail, User as UserIcon, Phone } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (user: User, token: string) => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
+  const { login: loginUser } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,10 +36,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
           phone,
           role
         });
-        onSuccess(user, token);
+        loginUser(user, token);
       } else {
         const { token, user } = await AuthService.login({ email, password });
-        onSuccess(user, token);
+        loginUser(user, token);
       }
       onClose();
     } catch (err: any) {

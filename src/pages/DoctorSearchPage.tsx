@@ -4,11 +4,11 @@ import { Doctor } from '../types';
 import { useToast } from '../context/ToastContext';
 import { Search, Filter, Star, Clock, Award, CheckCircle, Calendar } from 'lucide-react';
 
-interface DoctorSearchProps {
+interface DoctorSearchPageProps {
   onSelectDoctor: (doctor: Doctor) => void;
 }
 
-export const DoctorSearch: React.FC<DoctorSearchProps> = ({ onSelectDoctor }) => {
+export const DoctorSearchPage: React.FC<DoctorSearchPageProps> = ({ onSelectDoctor }) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [search, setSearch] = useState('');
   const [specialization, setSpecialization] = useState('');

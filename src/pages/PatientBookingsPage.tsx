@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BookingService } from '../services/booking.service';
 import { Consultation, Prescription } from '../types';
-import { Video, FileText, Calendar, Clock, CheckCircle2, AlertCircle, Download, X } from 'lucide-react';
+import { Video, FileText, Calendar, Clock, CheckCircle2, Download, X } from 'lucide-react';
 
-export const PatientBookings: React.FC = () => {
+export const PatientBookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<Consultation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPrescription, setSelectedPrescription] = useState<Prescription | null>(null);
